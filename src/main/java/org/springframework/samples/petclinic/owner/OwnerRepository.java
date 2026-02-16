@@ -20,6 +20,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * Repository class for <code>Owner</code> domain objects. All method names are compliant
@@ -42,6 +43,7 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 * @return a Collection of matching {@link Owner}s (or an empty Collection if none
 	 * found)
 	 */
+	@Query("SELECT o FROM Owner o WHERE o.lastName LIKE :lastName ESCAPE '\\'")
 	Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
 
 	/**
