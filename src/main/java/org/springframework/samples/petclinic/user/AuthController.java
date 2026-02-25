@@ -1,5 +1,7 @@
 package org.springframework.samples.petclinic.user;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.samples.petclinic.school.School;
 import org.springframework.samples.petclinic.school.SchoolRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -38,7 +41,8 @@ public class AuthController {
 	@PostMapping("/register-student")
 	public String processRegisterForm(@Valid User user,
 									  BindingResult result,
-									  RedirectAttributes redirectAttributes) {
+									  RedirectAttributes redirectAttributes,
+									  HttpServletRequest request) {
 		if (result.hasErrors()) {
 			return "auth/registerForm";
 		}
@@ -50,7 +54,7 @@ public class AuthController {
 			userService.registerNewStudent(user);
 		} catch (RuntimeException ex) {
 			// Handle duplicate email or other service errors
-			result.rejectValue("email", "duplicate", "This email is already registered");
+			result.rejectValue("email", "duplicateEmail", "This email is already registered");
 			return "auth/registerForm";
 		}
 
@@ -60,6 +64,11 @@ public class AuthController {
 			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), rawPassword);
 			Authentication authentication = authenticationManager.authenticate(authToken);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
+			HttpSession session = request.getSession(true);
+			session.setAttribute(
+				HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+				SecurityContextHolder.getContext()
+			);
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("messageDanger", "Account created, but auto-login failed.");
 			return "redirect:/login";
