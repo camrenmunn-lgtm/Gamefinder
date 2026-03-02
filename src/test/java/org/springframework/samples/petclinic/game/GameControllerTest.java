@@ -17,6 +17,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -33,6 +34,9 @@ class GameControllerTest {
 	@MockitoBean
 	private GameRepository games;
 
+	@MockitoBean
+	private PublisherRepository publishers;
+
 	private Game game;
 
 	@BeforeEach
@@ -45,6 +49,9 @@ class GameControllerTest {
 		game.setReleaseYear(1986);
 		game.setRarityScore(Game.RarityScore.VeryRare);
 		game.setAvgValue(new BigDecimal("85.00"));
+
+		// Stub publishers to return an empty list by default
+		given(this.publishers.findAll()).willReturn(List.of());
 	}
 
 	@Test
@@ -65,4 +72,41 @@ class GameControllerTest {
 			.andExpect(model().attributeExists("currentPage"))
 			.andExpect(view().name("games/gamesList"));
 	}
+
+	@Test
+	void testInitCreationForm() throws Exception {
+		// GET /games/new should return a blank form with an empty Game object
+		mockMvc.perform(get("/games/new"))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeExists("game"))
+			.andExpect(model().attributeExists("publishers"))
+			.andExpect(view().name("games/createOrUpdateGameForm"));
+	}
+
+	@Test
+	void testProcessCreationFormSuccess() throws Exception {
+		// POST /games/new with valid data should save and redirect to the games list
+		mockMvc.perform(post("/games/new")
+				.param("name", "Tetris")
+				.param("gameType", "VideoGame")
+				.param("releaseYear", "1984")
+				.param("rarityScore", "Common")
+				.param("avgValue", "12.50"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/games"));
+	}
+
+	@Test
+	void testProcessCreationFormHasErrors() throws Exception {
+		// POST /games/new with a blank name should re-display the form with errors
+		mockMvc.perform(post("/games/new")
+				.param("name", "")         // blank name — required field
+				.param("gameType", "")     // blank type — required field
+				.param("releaseYear", "")) // blank year — required field
+			.andExpect(status().isOk())
+			.andExpect(model().attributeHasErrors("game"))
+			.andExpect(model().attributeHasFieldErrors("game", "name"))
+			.andExpect(view().name("games/createOrUpdateGameForm"));
+	}
+
 }

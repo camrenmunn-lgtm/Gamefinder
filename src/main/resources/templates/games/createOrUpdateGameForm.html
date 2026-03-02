@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'games')}">
+
+<body>
+
+<h2 th:text="${game['new']} ? #{addGame} : #{updateGame}">Add Game</h2>
+
+<form th:object="${game}" class="form-horizontal" id="add-game-form" method="post">
+  <div class="form-group has-feedback">
+
+    <input th:replace="~{fragments/inputField :: input (#{name}, 'name', 'text')}" />
+
+    <div th:with="valid=${!#fields.hasErrors('gameType')}"
+         th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+      <label class="col-sm-2 control-label" th:text="#{gameType}">Game Type</label>
+      <div class="col-sm-10">
+        <select th:field="*{gameType}" class="form-control">
+          <option value="">-- Select --</option>
+          <option th:each="type : ${gameTypes}" th:value="${type}" th:text="${type}">Type</option>
+        </select>
+        <span th:if="${!valid}" class="help-inline" th:errors="*{gameType}">Error</span>
+      </div>
+    </div>
+
+    <input th:replace="~{fragments/inputField :: input (#{releaseYear}, 'releaseYear', 'text')}" />
+
+    <div th:with="valid=${!#fields.hasErrors('rarityScore')}"
+         th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+      <label class="col-sm-2 control-label" th:text="#{rarityScore}">Rarity Score</label>
+      <div class="col-sm-10">
+        <select th:field="*{rarityScore}" class="form-control">
+          <option value="">-- Select --</option>
+          <option th:each="score : ${rarityScores}" th:value="${score}" th:text="${score}">Score</option>
+        </select>
+        <span th:if="${!valid}" class="help-inline" th:errors="*{rarityScore}">Error</span>
+      </div>
+    </div>
+
+    <div th:with="valid=${!#fields.hasErrors('publisher')}"
+         th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+      <label class="col-sm-2 control-label" th:text="#{publisher}">Publisher</label>
+      <div class="col-sm-10">
+        <select th:field="*{publisher}" class="form-control">
+          <option value="">-- Select --</option>
+          <option th:each="pub : ${publishers}" th:value="${pub.id}" th:text="${pub.name}">Publisher</option>
+        </select>
+        <span th:if="${!valid}" class="help-inline" th:errors="*{publisher}">Error</span>
+      </div>
+    </div>
+
+    <input th:replace="~{fragments/inputField :: input (#{avgValue}, 'avgValue', 'text')}" />
+    <input th:replace="~{fragments/inputField :: input (#{estimatedCopiesMade}, 'estimatedCopiesMade', 'text')}" />
+    <input th:replace="~{fragments/inputField :: input (#{description}, 'description', 'text')}" />
+
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button th:with="text=${game['new']} ? #{addGame} : #{updateGame}"
+              class="btn btn-primary" type="submit" th:text="${text}">Add Game</button>
+    </div>
+  </div>
+</form>
+
+</body>
+
+</html>

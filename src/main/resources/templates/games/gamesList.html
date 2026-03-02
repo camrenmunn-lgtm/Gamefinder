@@ -6,6 +6,7 @@
 
 <h2 th:text="#{games}">Games</h2>
 
+<a th:href="@{/games/new}" class="btn btn-primary" th:text="#{addGame}">Add Game</a>
 <table id="games" class="table table-striped">
   <thead>
   <tr>
@@ -56,6 +57,8 @@
     <span th:unless="${currentPage < totalPages}" th:title="#{last}" class="fa fa-fast-forward"></span>
   </span>
 </div>
+
+
 
 </body>
 
