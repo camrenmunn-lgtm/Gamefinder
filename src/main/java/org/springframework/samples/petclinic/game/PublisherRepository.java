@@ -9,4 +9,8 @@ public interface PublisherRepository extends Repository<Publisher, Integer> {
 	@Transactional(readOnly = true)
 	Collection<Publisher> findAll();
 
+
+	@Transactional(readOnly = true)
+	Publisher findById(Integer id);
+
 }
