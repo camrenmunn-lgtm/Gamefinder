@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 class GameController {
 
 	private final GameRepository gameRepository;
+
 	private final PublisherRepository publisherRepository;
 
 	public GameController(GameRepository gameRepository, PublisherRepository publisherRepository) {

@@ -21,7 +21,9 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE schools SET deleted_at = NOW() WHERE id = ?")
 // Automatically filter out deleted rows when reading data
 @SQLRestriction("deleted_at IS NULL")
-public class School extends NamedEntity { // Inherits 'id' and 'name'
+public class School extends NamedEntity {
+
+// Inherits 'id' and 'name'
 
 	@Column(name = "domain")
 	@NotEmpty
@@ -51,6 +53,9 @@ public class School extends NamedEntity { // Inherits 'id' and 'name'
 	}
 
 	public enum SchoolStatus {
+
 		ACTIVE, INACTIVE, SUSPENDED
+
 	}
+
 }

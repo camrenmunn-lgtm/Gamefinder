@@ -62,4 +62,5 @@ class SchoolControllerTest {
 			.andExpect(model().attributeExists("currentPage"))
 			.andExpect(view().name("schools/schoolList"));
 	}
+
 }

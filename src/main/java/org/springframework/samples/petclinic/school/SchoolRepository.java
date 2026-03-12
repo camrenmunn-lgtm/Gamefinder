@@ -30,4 +30,5 @@ public interface SchoolRepository extends Repository<School, Integer> {
 	 */
 	@Transactional(readOnly = true)
 	School findById(Integer id);
+
 }

@@ -86,8 +86,8 @@ class GameControllerTest {
 	@Test
 	void testProcessCreationFormSuccess() throws Exception {
 		// POST /games/new with valid data should save and redirect to the games list
-		mockMvc.perform(post("/games/new")
-				.param("name", "Tetris")
+		mockMvc
+			.perform(post("/games/new").param("name", "Tetris")
 				.param("gameType", "VideoGame")
 				.param("releaseYear", "1984")
 				.param("rarityScore", "Common")
@@ -99,10 +99,10 @@ class GameControllerTest {
 	@Test
 	void testProcessCreationFormHasErrors() throws Exception {
 		// POST /games/new with a blank name should re-display the form with errors
-		mockMvc.perform(post("/games/new")
-				.param("name", "")         // blank name — required field
-				.param("gameType", "")     // blank type — required field
-				.param("releaseYear", "")) // blank year — required field
+		mockMvc.perform(post("/games/new").param("name", "") // blank name — required
+																// field
+			.param("gameType", "") // blank type — required field
+			.param("releaseYear", "")) // blank year — required field
 			.andExpect(status().isOk())
 			.andExpect(model().attributeHasErrors("game"))
 			.andExpect(model().attributeHasFieldErrors("game", "name"))

@@ -32,4 +32,5 @@ class SchoolController {
 
 		return "schools/schoolList"; // You will need to create this HTML file
 	}
+
 }

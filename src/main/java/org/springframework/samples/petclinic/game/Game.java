@@ -60,11 +60,15 @@ public class Game extends NamedEntity {
 	private LocalDateTime updatedAt;
 
 	public enum GameType {
+
 		VideoGame, BoardGame
+
 	}
 
 	public enum RarityScore {
+
 		UltraRare, VeryRare, Rare, Uncommon, Common
+
 	}
 
 }
