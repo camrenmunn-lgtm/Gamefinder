@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.validation.OnRegister;
@@ -18,6 +20,10 @@ import java.util.Set;
 @Table(name = "users")
 @Data
 @NoArgsConstructor
+// Intercept the delete command and turn it into an update
+@SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
+// Automatically filter out deleted rows when reading data
+@SQLRestriction("deleted_at IS NULL")
 public class User extends BaseEntity {
 
 	@Column(name="first_name", nullable = true, length = 50)
