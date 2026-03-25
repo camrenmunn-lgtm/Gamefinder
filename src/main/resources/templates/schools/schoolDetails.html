@@ -33,12 +33,20 @@
         </div>
 
         <div class="card-body">
-          <h5 class="card-title text-primary"
-              th:text="(${currentUser.nickname} ?: ${currentUser.firstName}) + ' ' + ${currentUser.lastName}">
-            Player Name
-          </h5>
+          <th:block th:if="${!#strings.isEmpty(currentUser.firstName) or !#strings.isEmpty(currentUser.nickname)}">
 
-          <hr>
+            <h5 class="card-title text-primary">
+
+              <span th:if="${!#strings.isEmpty(currentUser.nickname)}"
+                th:text="${currentUser.nickname}">Nickname</span>
+
+              <span th:if="${#strings.isEmpty(currentUser.nickname)}"
+                    th:text="${currentUser.firstName + (!#strings.isEmpty(currentUser.lastName) ? ' ' + currentUser.lastName : '')}">First Last</span>
+
+            </h5>
+
+            <hr>
+          </th:block>
 
           <div class="mb-3 text-sm">
             <strong>Email:</strong> <br>

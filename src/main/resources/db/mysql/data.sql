@@ -138,3 +138,11 @@ INSERT IGNORE INTO locations (school_id, parent_location_id, name, description, 
 INSERT IGNORE INTO locations (school_id, parent_location_id, name, description, status_id) VALUES
                                    (1, 3, 'Basketball Court 1', 'North court', 'active'),
                                    (1, 3, 'Basketball Court 2', 'South court', 'active');
+
+INSERT IGNORE INTO recipes (recipe_ingredients, instructions, type, category, dietary_preference, internal_notes)
+VALUES
+  ('Chickpeas, Tahini, Lemon', 'Blend until smooth.', 'Appetizer', 'Mediterranean', 'Vegan', 'Classic hummus'),
+  ('Pasta, Tomato, Basil', 'Boil pasta, add sauce.', 'Main Course', 'Italian', 'Vegetarian', 'Simple Pomodoro'),
+  ('Beef, Tortilla, Salsa', 'Cook beef, assemble taco.', 'Main Course', 'Mexican', 'Meat-based', 'Street style'),
+  ('Lentils, Carrots, Curry Powder', 'Simmer until soft.', 'Soup', 'Indian', 'Vegan', 'Healthy Dal'),
+  ('Zucchini, Garlic, Olive Oil', 'Sauté zucchini noodles.', 'Main Course', 'Italian', 'Vegan', 'Low carb option');

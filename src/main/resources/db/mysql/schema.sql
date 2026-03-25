@@ -130,3 +130,17 @@ CREATE TABLE IF NOT EXISTS locations (
        CONSTRAINT fk_locations_parent FOREIGN KEY (parent_location_id) REFERENCES locations(id) ON DELETE SET NULL,
        UNIQUE KEY uk_school_location (school_id, name)
 );
+
+
+CREATE TABLE IF NOT EXISTS recipes
+(
+  id bigint unsigned auto_increment primary key,
+  recipe_ingredients varchar(255) null,
+  instructions       varchar(255) not null,
+  type               varchar(50)  null,
+  category           varchar(50)  null,
+  dietary_preference varchar(50)  null,
+  internal_notes     varchar(255) not null,
+  constraint id unique (id),
+  constraint internal_notes unique (internal_notes)
+);
