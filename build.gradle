@@ -62,6 +62,10 @@ dependencies {
   testImplementation 'org.springframework.security:spring-security-test'
   checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${springJavaformatCheckstyleVersion}"
   checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
+  // ... other dependencies
+  testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+  testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+
 }
 
 tasks.named('test') {

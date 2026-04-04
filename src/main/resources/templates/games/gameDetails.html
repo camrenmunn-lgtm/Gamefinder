@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'games')}">
+
+<body>
+
+<div class="container mt-4">
+
+  <div class="mb-4 pb-2 border-bottom d-flex justify-content-between align-items-center">
+    <h1 th:text="${game.name}">Game Title</h1>
+    <a th:href="@{/games}" class="btn btn-outline-secondary">
+      <i class="fa fa-arrow-left me-1"></i> Back to Games
+    </a>
+  </div>
+
+  <div class="row">
+
+    <!-- Left: Main game info -->
+    <div class="col-lg-8 mb-4">
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Game Details</h5>
+        </div>
+        <div class="card-body">
+
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted fw-semibold">Type</div>
+            <div class="col-sm-8" th:text="${game.gameType}">VideoGame</div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted fw-semibold">Release Year</div>
+            <div class="col-sm-8" th:text="${game.releaseYear}">1986</div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted fw-semibold">Publisher</div>
+            <div class="col-sm-8"
+                 th:text="${game.publisher != null ? game.publisher.name : 'Unknown'}">Nintendo</div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted fw-semibold">Rarity</div>
+            <div class="col-sm-8">
+              <span th:switch="${game.rarityScore}">
+                <span th:case="'UltraRare'" class="badge bg-danger">Ultra Rare</span>
+                <span th:case="'VeryRare'"  class="badge bg-warning text-dark">Very Rare</span>
+                <span th:case="'Rare'"      class="badge bg-info text-dark">Rare</span>
+                <span th:case="'Uncommon'"  class="badge bg-secondary">Uncommon</span>
+                <span th:case="'Common'"    class="badge bg-light text-dark border">Common</span>
+                <span th:case="*"           class="badge bg-light text-dark border">Unknown</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted fw-semibold">Avg Value</div>
+            <div class="col-sm-8"
+                 th:text="${game.avgValue != null ? '$' + #numbers.formatDecimal(game.avgValue, 1, 2) : 'N/A'}">
+              $85.00
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted fw-semibold">Est. Copies Made</div>
+            <div class="col-sm-8"
+                 th:text="${game.estimatedCopiesMade != null ? #numbers.formatInteger(game.estimatedCopiesMade, 1, 'COMMA') : 'Unknown'}">
+              6,500,000
+            </div>
+          </div>
+
+          <div class="row mb-0" th:if="${game.description != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Description</div>
+            <div class="col-sm-8" th:text="${game.description}">Description here.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Board game details (only shown if present) -->
+      <div class="card shadow-sm" th:if="${boardGameDetails != null}">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Board Game Details</h5>
+        </div>
+        <div class="card-body">
+
+          <div class="row mb-3" th:if="${boardGameDetails.playerCountMin != null or boardGameDetails.playerCountMax != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Players</div>
+            <div class="col-sm-8">
+              <span th:text="${boardGameDetails.playerCountMin}">2</span>
+              <span th:if="${boardGameDetails.playerCountMax != null}">
+                – <span th:text="${boardGameDetails.playerCountMax}">4</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="row mb-3" th:if="${boardGameDetails.avgPlayTime != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Avg Play Time</div>
+            <div class="col-sm-8">
+              <span th:text="${boardGameDetails.avgPlayTime}">60</span> min
+            </div>
+          </div>
+
+          <div class="row mb-3" th:if="${boardGameDetails.complexityRating != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Complexity</div>
+            <div class="col-sm-8">
+              <span th:text="${boardGameDetails.complexityRating}">3.5</span> / 5.00
+            </div>
+          </div>
+
+          <div class="row mb-3" th:if="${boardGameDetails.expansionStatus != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Edition Type</div>
+            <div class="col-sm-8" th:text="${boardGameDetails.expansionStatus}">BaseGame</div>
+          </div>
+
+          <div class="row mb-3" th:if="${boardGameDetails.edition != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Edition</div>
+            <div class="col-sm-8" th:text="${boardGameDetails.edition}">Classic</div>
+          </div>
+
+          <div class="row mb-3" th:if="${boardGameDetails.language != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Language</div>
+            <div class="col-sm-8" th:text="${boardGameDetails.language}">English</div>
+          </div>
+
+          <div class="row mb-0" th:if="${boardGameDetails.ageRating != null}">
+            <div class="col-sm-4 text-muted fw-semibold">Age Rating</div>
+            <div class="col-sm-8">
+              <span th:text="${boardGameDetails.ageRating}">8</span>+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Sidebar -->
+    <div class="col-lg-4">
+
+      <!-- Game image if present -->
+      <div class="card shadow-sm mb-4" th:if="${game.gameImage != null}">
+        <img th:src="@{/games/{id}/image(id=${game.id})}"
+             class="card-img-top" alt="Game Image" style="object-fit: cover; max-height: 250px;">
+      </div>
+
+      <!-- Placeholder if no image -->
+      <div class="card shadow-sm mb-4 text-center text-muted p-4" th:unless="${game.gameImage != null}">
+        <i class="fa fa-gamepad fa-3x mb-2"></i>
+        <p class="mb-0 small">No image available</p>
+      </div>
+
+      <!-- Meta info card -->
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h6 class="mb-0 text-muted">Record Info</h6>
+        </div>
+        <div class="card-body small text-muted">
+          <div class="mb-2" th:if="${game.createdAt != null}">
+            <strong>Added:</strong>
+            <span th:text="${#temporals.format(game.createdAt, 'MMM dd, yyyy')}">Jan 01, 2026</span>
+          </div>
+          <div th:if="${game.updatedAt != null}">
+            <strong>Last Updated:</strong>
+            <span th:text="${#temporals.format(game.updatedAt, 'MMM dd, yyyy')}">Jan 01, 2026</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

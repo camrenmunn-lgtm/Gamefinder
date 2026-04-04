@@ -99,6 +99,16 @@
             <span th:text="#{home}">Home</span>
           </li>
 
+          <li th:replace="~{::menuItem ('/games','games','list of games','search',#{findgames})}">
+            <span class="fa fa-th-list" aria-hidden="true"></span>
+            <span th:text="#{findgames}">Games</span>
+          </li>
+
+          <li th:replace="~{::menuItem ('/publishers','publishers','List of Publishers','th-list',#{publishers})}">
+            <span class="fa fa-th-list" aria-hidden="true"></span>
+            <span th:text="#{publishers}">Publishers</span>
+          </li>
+
           <li th:replace="~{::menuItem ('/schools','schools','list of schools','graduation-cap',#{findSchools})}">
             <span class="fa fa-search" aria-hidden="true"></span>
             <span th:text="#{findSchools}">Schools</span>
