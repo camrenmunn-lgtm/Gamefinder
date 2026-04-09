@@ -18,8 +18,10 @@ class UserServiceImplTest {
 
 	@Mock
 	private UserRepository userRepository;
+
 	@Mock
 	private RoleRepository roleRepository;
+
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
@@ -40,38 +42,31 @@ class UserServiceImplTest {
 	}
 
 	@Test
-	void registerNewUser() {
-		// --- 1. ARRANGE Mock Behavior (When these methods are called, return this) ---
-		// Simulate password hashing: encoder.encode() should return the hashed string
+	void registerNewStudent_HashesPasswordAndAssignsRole() {
 		when(passwordEncoder.encode(testUser.getPassword())).thenReturn("hashedPassword");
-
-		// Simulate role lookup: roleRepository.findByName() should return the STUDENT role
 		when(roleRepository.findByName("STUDENT")).thenReturn(Optional.of(studentRole));
-
-		// Simulate save: userRepository.save() should return the user object that was passed to it
 		when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-		// --- 2. ACT by calling the method to test ---
 		User registeredUser = userService.registerNewStudent(testUser);
 
-		// --- 3. ASSERT by verifying the results ---
-		// Check that the user object returned is not null
 		assertNotNull(registeredUser);
+		assertEquals("hashedPassword", registeredUser.getPassword(),
+			"Password must be hashed before saving.");
+		assertTrue(registeredUser.getRoles().contains(studentRole),
+			"User must be assigned the STUDENT role.");
 
-		// Check that the password was indeed hashed
-		assertEquals("hashedPassword", registeredUser.getPassword(), "Password must be hashed.");
-
-		// Check that the STUDENT role was assigned
-		assertTrue(registeredUser.getRoles().contains(studentRole), "User must have the STUDENT role.");
-
-		// --- 4. Verify Mock Interactions (Check the service called its dependencies correctly) ---
-		// Verify that the encoder was called once
 		verify(passwordEncoder, times(1)).encode("rawPassword");
-
-		// Verify that the role repository was called once
 		verify(roleRepository, times(1)).findByName("STUDENT");
-
-		// Verify that the user was saved once
 		verify(userRepository, times(1)).save(testUser);
+	}
+
+	@Test
+	void registerNewStudent_RoleNotFound_ThrowsException() {
+		when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
+		when(roleRepository.findByName("STUDENT")).thenReturn(Optional.empty());
+
+		assertThrows(RuntimeException.class, () ->
+				userService.registerNewStudent(testUser),
+			"Should throw when STUDENT role is not in the database.");
 	}
 }
