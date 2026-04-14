@@ -153,12 +153,7 @@ public class ProfileController {
 
 		redirectAttributes.addFlashAttribute("messageSuccess", "Your profile has been updated successfully");
 
-		String langCode = currentUser.getPreferredLanguage();
-		if(langCode != null) {
-			return "redirect:/users/profile?lang=" + langCode.toLowerCase();
-		}
-
-		return "redirect:/users/profile"; // This makes a new GET request
+		return "redirect:/users/profile";
 	}
 
 	@PostMapping("/delete")

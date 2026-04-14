@@ -1,86 +1,472 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
       th:replace="~{fragments/layout :: layout (~{::body},'profile')}">
 <body>
 
-<div class="container mt-4" style="max-width: 700px;">
+<style>
+  .profile-page {
+    background: #1a1a1a;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    color: #e0e0e0;
+  }
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Edit Profile</h2>
+  .profile-page h1.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+  }
 
-    <a th:if="${schoolSlug != null}"
-       th:href="@{/schools/{slug}(slug=${schoolSlug})}"
-       class="btn btn-outline-primary">
-      <i class="fa fa-arrow-left me-1"></i> Go to My School
-    </a>
-  </div>
+  .profile-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+  }
 
-  <div class="card mb-4">
-    <div class="card-body bg-success-subtle">
-      <form th:action="@{/users/profile}" th:object="${user}" method="post">
+  /* Avatar card */
+  .avatar-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #3a6bbf;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 auto 1rem auto;
+  }
 
-        <h5 class="card-title text-muted mb-3">Personal Information</h5>
-        <div class="row">
-          <div class="col-md-6">
-            <div th:replace="~{fragments/inputField :: input ('First Name', 'firstName', 'text')}"></div>
+  .avatar-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .avatar-email {
+    font-size: 0.82rem;
+    color: #aaaaaa;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .role-badge {
+    display: inline-block;
+    background: #2d6a2d;
+    color: #7ecb7e;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .upload-btn {
+    background: #3a3a3a;
+    border: 1px solid #555;
+    color: #cccccc;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    width: 100%;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .upload-btn:hover { background: #444; }
+
+  /* Collection stats */
+  .stats-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .stats-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #888888;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+  }
+
+  .stat-name {
+    font-size: 0.72rem;
+    color: #888888;
+    margin-top: 2px;
+  }
+
+  /* Section cards */
+  .section-card {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #888888;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Form inputs */
+  .profile-page .form-label {
+    color: #aaaaaa;
+    font-size: 0.82rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .profile-page .form-control,
+  .profile-page .form-select {
+    background: #333333;
+    border: 1px solid #4a4a4a;
+    color: #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .profile-page .form-control:focus,
+  .profile-page .form-select:focus {
+    background: #3a3a3a;
+    border-color: #3a6bbf;
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(58, 107, 191, 0.25);
+  }
+
+  .profile-page .form-control::placeholder {
+    color: #666666;
+  }
+
+  .profile-page .form-control.is-invalid,
+  .profile-page .form-select.is-invalid {
+    border-color: #dc3545;
+  }
+  .profile-page {
+    margin-left: -15px;
+    margin-right: -15px;
+    padding: 2rem 15px;
+  }
+
+  /* Toggle switch */
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #333;
+    font-size: 0.85rem;
+    color: #cccccc;
+  }
+  .toggle-row:last-child { border-bottom: none; }
+
+  .form-check-input:checked {
+    background-color: #3a6bbf;
+    border-color: #3a6bbf;
+  }
+
+  /* Save button */
+  .btn-save {
+    background: #3a6bbf;
+    border: none;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .btn-save:hover { background: #2f5aa8; color: #fff; }
+
+  /* Danger zone */
+  .danger-zone {
+    background: #1a1a1a;
+    border: 1px solid #8b2020;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 75%;
+    margin-top: 1.5rem;
+    margin-left: auto;
+    margin-bottom: 2rem;
+    horiz-align: right;
+  }
+
+  .danger-title {
+    color: #e05555;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .danger-text {
+    color: #888888;
+    font-size: 0.78rem;
+    margin: 0;
+  }
+
+  .btn-delete {
+    background: transparent;
+    border: 1px solid #8b2020;
+    color: #e05555;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+  .btn-delete:hover {
+    background: #8b2020;
+    color: #ffffff;
+  }
+
+  /* School button top right */
+  .btn-school {
+    background: transparent;
+    border: 1px solid #555;
+    color: #cccccc;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-school:hover {
+    background: #3a3a3a;
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .hint-text {
+    font-size: 0.75rem;
+    color: #666666;
+    margin-top: 0.25rem;
+  }
+</style>
+
+<div class="profile-page">
+  <div class="container-fluid" style="max-width: 1100px;">
+
+    <!-- Page header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="page-title">My Profile</h1>
+<!--      <a th:if="${schoolSlug != null}"-->
+<!--         th:href="@{/schools/{slug}(slug=${schoolSlug})}"-->
+<!--         class="btn-school">-->
+<!--        <i class="fa fa-arrow-left me-1"></i> Go to My School-->
+<!--      </a>-->
+    </div>
+
+    <form th:action="@{/users/profile}" th:object="${user}" method="post">
+
+      <div class="row g-3">
+
+        <!-- ── LEFT COLUMN: Avatar + Stats ─────────────────────────── -->
+        <div class="col-lg-3">
+
+          <!-- Avatar card -->
+          <div class="profile-card text-center">
+            <div class="avatar-circle">
+              <span th:text="${(user.firstName != null ? #strings.substring(user.firstName,0,1) : '') +
+                 (user.lastName  != null ? #strings.substring(user.lastName,0,1)  : '')}">?</span>
+            </div>
+            <div class="avatar-name"
+                 th:text="${(user.firstName != null ? user.firstName : '') + ' ' + (user.lastName != null ? user.lastName : '')}">
+              Camren Munn
+            </div>
+            <div class="avatar-email" th:text="${user.email}">camren@kirkwood.edu</div>
+            <div class="text-center mb-2">
+              <span class="role-badge"
+                    th:text="${user.roles != null and !user.roles.isEmpty() ? user.roles.iterator().next().name : 'COLLECTOR'}">
+                Collector
+              </span>
+            </div>
+            <button type="button" class="upload-btn">Upload Photo</button>
           </div>
-          <div class="col-md-6">
-            <div th:replace="~{fragments/inputField :: input ('Last Name', 'lastName', 'text')}"></div>
+
+          <!-- Collection stats -->
+          <div class="stats-card">
+            <div class="stats-label">Collection Stats</div>
+            <div class="d-flex justify-content-around">
+              <div class="stat-item">
+                <div class="stat-number" th:text="${gameCount != null ? gameCount : 0}">0</div>
+                <div class="stat-name">Games</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number" th:text="${wishlistCount != null ? wishlistCount : 0}">0</div>
+                <div class="stat-name">Wishlisted</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number" th:text="${reviewCount != null ? reviewCount : 0}">0</div>
+                <div class="stat-name">Reviews</div>
+              </div>
+            </div>
           </div>
+
         </div>
 
-        <div class="row">
-          <div class="col-md-6">
-            <div th:replace="~{fragments/inputField :: input ('Nickname', 'nickname', 'text')}"></div>
+        <!-- ── MIDDLE COLUMN: Personal Info + Security ────────────── -->
+        <div class="col-lg-5">
+
+          <!-- Personal Information -->
+          <div class="section-card">
+            <div class="section-label">Personal Information</div>
+
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <label class="form-label">First Name</label>
+                <input type="text" th:field="*{firstName}" class="form-control"
+                       th:classappend="${#fields.hasErrors('firstName')} ? ' is-invalid' : ''" />
+                <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback">
+                  <span th:errors="*{firstName}"></span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Last Name</label>
+                <input type="text" th:field="*{lastName}" class="form-control"
+                       th:classappend="${#fields.hasErrors('lastName')} ? ' is-invalid' : ''" />
+                <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback">
+                  <span th:errors="*{lastName}"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Nickname</label>
+              <input type="text" th:field="*{nickname}" class="form-control"
+                     placeholder="Optional display name"
+                     th:classappend="${#fields.hasErrors('nickname')} ? ' is-invalid' : ''" />
+              <div th:if="${#fields.hasErrors('nickname')}" class="invalid-feedback">
+                <span th:errors="*{nickname}"></span>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Preferred Language</label>
+              <select th:field="*{preferredLanguage}" class="form-select">
+                <option th:each="entry : ${languageOptions}"
+                        th:value="${entry.key}"
+                        th:text="${entry.value}"
+                        th:selected="${entry.key == user.preferredLanguage}">
+                </option>
+              </select>
+            </div>
           </div>
-          <div class="col-md-6">
-            <div th:replace="~{fragments/selectField :: select ('Preferred Language', 'preferredLanguage', ${languageOptions})}"></div>
+
+          <!-- Security -->
+          <div class="section-card">
+            <div class="section-label">Security</div>
+            <div class="mb-2">
+              <label class="form-label">New Password</label>
+              <input type="password" th:field="*{password}" class="form-control"
+                     th:classappend="${#fields.hasErrors('password')} ? ' is-invalid' : ''" />
+              <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
+                <span th:errors="*{password}"></span>
+              </div>
+              <div class="hint-text">Leave blank to keep current password</div>
+            </div>
+
+            <button type="submit" class="btn-save mt-2">Save Changes</button>
           </div>
+
         </div>
 
-        <hr class="my-4">
+        <!-- ── RIGHT COLUMN: Contact + Privacy ───────────────────── -->
+        <div class="col-lg-4">
 
-        <h5 class="card-title text-muted mb-3">Contact Information</h5>
+          <!-- Contact Information -->
+          <div class="section-card">
+            <div class="section-label">Contact Information</div>
 
-        <div class="row mt-3">
-          <div class="col-md-6">
-            <div th:replace="~{fragments/inputField :: input ('Email Address', 'email', 'text')}"></div>
-            <div th:replace="~{fragments/checkboxField :: checkbox ('Make Email Public to other students', 'publicEmail')}"></div>
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input type="text" th:field="*{email}" class="form-control"
+                     th:classappend="${#fields.hasErrors('email')} ? ' is-invalid' : ''" />
+              <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                <span th:errors="*{email}"></span>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Phone Number</label>
+              <input type="text" th:field="*{phone}" class="form-control"
+                     placeholder="(319) 555-0199"
+                     th:classappend="${#fields.hasErrors('phone')} ? ' is-invalid' : ''" />
+              <div th:if="${#fields.hasErrors('phone')}" class="invalid-feedback">
+                <span th:errors="*{phone}"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="col-md-6">
-            <div th:replace="~{fragments/inputField :: input ('Phone Number', 'phone', 'text')}"></div>
-            <div th:replace="~{fragments/checkboxField :: checkbox ('Make Phone Public to other students', 'publicPhone')}"></div>
+          <!-- Privacy Settings -->
+          <div class="section-card">
+            <div class="section-label">Privacy Settings</div>
+
+            <div class="toggle-row">
+              <span>Show email to other collectors</span>
+              <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" th:field="*{publicEmail}" role="switch" />
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <span>Show phone to other collectors</span>
+              <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" th:field="*{publicPhone}" role="switch" />
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <hr class="my-4">
 
-        <h5 class="card-title text-muted mb-3">Security</h5>
-        <div class="alert alert-info py-2 text-sm">
-          <small>Leave the password field blank unless you want to change it.</small>
         </div>
-        <div th:replace="~{fragments/inputField :: input ('New Password', 'password', 'password')}"></div>
+      </div><!-- end row -->
 
-        <div class="d-grid gap-2 mt-4">
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
+    </form><!-- end main form -->
 
+    <div style="clear: both;"></div>
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+      <div>
+        <div class="danger-title">Delete Account</div>
+        <p class="danger-text">Once deleted, your account cannot be recovered.</p>
+      </div>
+      <form th:action="@{/users/delete}" method="post"
+            onsubmit="return confirm('Are you absolutely sure you want to delete your account? This cannot be undone.');">
+        <button type="submit" class="btn-delete">Delete Account</button>
       </form>
     </div>
+
   </div>
-
-  <div class="card border-danger mb-5">
-      <div class="card-body text-danger">
-      <h5 class="card-title">Danger Zone</h5>
-      <p class="card-text">Once you delete your account, there is no going back. Please be certain.</p>
-
-      <form th:action="@{/users/delete}" method="post" onsubmit="return confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.');">
-        <button type="submit" class="btn btn-outline-danger">Delete Account</button>
-      </form>
-    </div>
-  </div>
-
 </div>
 
 </body>

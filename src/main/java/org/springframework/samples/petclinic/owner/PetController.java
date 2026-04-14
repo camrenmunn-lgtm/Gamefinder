@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.owner;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -59,8 +60,11 @@ class PetController {
 	}
 
 	@ModelAttribute("types")
-	public Collection<PetType> populatePetTypes() {
-		return this.types.findPetTypes();
+	public Map<String, String> populatePetTypes() {
+		return this.types.findPetTypes().stream()
+			.collect(java.util.LinkedHashMap::new,
+				(map, type) -> map.put(type.getName(), type.getName()),
+				java.util.LinkedHashMap::putAll);
 	}
 
 	@ModelAttribute("owner")

@@ -29,44 +29,43 @@ class UserServiceImplTest {
 	private UserServiceImpl userService;
 
 	private User testUser;
-	private Role studentRole;
+	private Role collectorRole;
 
 	@BeforeEach
 	void setUp() {
 		testUser = new User();
-		testUser.setEmail("test@kirkwood.edu");
+		testUser.setEmail("test@gmail.com");
 		testUser.setPassword("rawPassword");
 
-		studentRole = new Role();
-		studentRole.setName("STUDENT");
+		collectorRole = new Role();
+		collectorRole.setName("COLLECTOR");
 	}
-
 	@Test
-	void registerNewStudent_HashesPasswordAndAssignsRole() {
+	void registerNewCollector_HashesPasswordAndAssignsRole() {
 		when(passwordEncoder.encode(testUser.getPassword())).thenReturn("hashedPassword");
-		when(roleRepository.findByName("STUDENT")).thenReturn(Optional.of(studentRole));
+		when(roleRepository.findByName("COLLECTOR")).thenReturn(Optional.of(collectorRole));
 		when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-		User registeredUser = userService.registerNewStudent(testUser);
+		User registeredUser = userService.registerNewCollector(testUser);
 
 		assertNotNull(registeredUser);
 		assertEquals("hashedPassword", registeredUser.getPassword(),
 			"Password must be hashed before saving.");
-		assertTrue(registeredUser.getRoles().contains(studentRole),
-			"User must be assigned the STUDENT role.");
+		assertTrue(registeredUser.getRoles().contains(collectorRole),
+			"User must be assigned the COLLECTOR  role.");
 
 		verify(passwordEncoder, times(1)).encode("rawPassword");
-		verify(roleRepository, times(1)).findByName("STUDENT");
+		verify(roleRepository, times(1)).findByName("COLLECTOR");
 		verify(userRepository, times(1)).save(testUser);
 	}
 
 	@Test
-	void registerNewStudent_RoleNotFound_ThrowsException() {
+	void registerNewCollector_RoleNotFound_ThrowsException() {
 		when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
-		when(roleRepository.findByName("STUDENT")).thenReturn(Optional.empty());
+		when(roleRepository.findByName("COLLECTOR")).thenReturn(Optional.empty());
 
 		assertThrows(RuntimeException.class, () ->
-				userService.registerNewStudent(testUser),
-			"Should throw when STUDENT role is not in the database.");
+				userService.registerNewCollector(testUser),
+			"Should throw when COLLECTOR  role is not in the database.");
 	}
 }

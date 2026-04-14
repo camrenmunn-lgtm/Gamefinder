@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.samples.petclinic.user.User;
+import org.springframework.samples.petclinic.user.UserRepository;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.data.domain.Page;
@@ -34,8 +36,10 @@ class SchoolControllerTest {
 
 	@MockitoBean
 	private SchoolRepository schools;
-
+	@MockitoBean
+	private UserRepository users;
 	private School school;
+	private User user;
 
 	@BeforeEach
 	void setup() {
@@ -82,8 +86,7 @@ class SchoolControllerTest {
 				.param("name", "University of Iowa")
 				.param("domain", "uiowa.edu"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/schools"));
-
+			.andExpect(redirectedUrl("/schools/uiowa"));
 		// Verify that the repository.save() method was actually called
 		verify(schools).save(any(School.class));
 	}

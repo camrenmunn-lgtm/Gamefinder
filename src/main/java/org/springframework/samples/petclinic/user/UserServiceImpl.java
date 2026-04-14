@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -19,15 +20,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// This method is to register user's for Marc's demo project
-	public User registerNewStudent(User user) {
-		// Hash the user's password
+	public User registerNewCollector(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		// Default the user's default role
-		Role studentRole = roleRepository.findByName("STUDENT").orElseThrow(() -> new RuntimeException("Student Role Not Found"));
+		Role collectorRole = roleRepository.findByName("COLLECTOR").orElseThrow(() -> new RuntimeException("Collector Role Not Found"));
 		Set<Role> roles = new HashSet<>();
-		roles.add(studentRole);
+		roles.add(collectorRole);
 		user.setRoles(roles);
-		// Save the user's data
 		return userRepository.save(user);
+	}
+
+	@Override
+	public Optional<User> findByEmail(String email) {
+		return userRepository.findByEmail(email);
 	}
 }

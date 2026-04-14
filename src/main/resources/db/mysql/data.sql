@@ -61,9 +61,8 @@ INSERT IGNORE INTO visits VALUES (4, 7, '2008-09-04', 'spayed');
 -- =============================================================================
 
 INSERT IGNORE INTO roles (id, name, description) VALUES
-  (1, 'SCHOOL_ADMIN', 'Rec Center Admin: Can manage facilities, leagues, scores, and users.'),
-  (2, 'STUDENT', 'Student: Can join leagues, create teams, and view schedules.');
-
+                                                   (1, 'ADMIN', 'GameFinder Admin: can manage game list, users, publishers, etc'),
+                                                   (2, 'COLLECTOR', 'Game Collector: can view and add games to their collections.');
 INSERT IGNORE INTO permissions (id, name, description) VALUES
   (1,  'MANAGE_OWN_PROFILE',     'Allows user to update their personal info and password.'),
   (2,  'USE_MESSAGING',          'Allows user to send/receive messages with other participants.'),

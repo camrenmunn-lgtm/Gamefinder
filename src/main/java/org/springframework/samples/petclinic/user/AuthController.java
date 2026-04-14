@@ -55,7 +55,7 @@ public class AuthController {
 
 		// 1. Save the User (UserService handles password hashing)
 		try {
-			userService.registerNewStudent(user);
+			userService.registerNewCollector(user);
 		} catch (RuntimeException ex) {
 			// Handle duplicate email or other service errors
 			result.rejectValue("email", "duplicateEmail", "This email is already registered");
@@ -78,20 +78,11 @@ public class AuthController {
 			return "redirect:/login";
 		}
 
-		// 3. Redirect a new user
-		String email = user.getEmail();
-		Optional<School> school = findSchoolByRecursiveDomain(email);
-
-		if(school.isPresent()) {
-			redirectAttributes.addFlashAttribute("messageSuccess",
-				"Your user account has been created. You have been redirected to " + school.get().getName() + "'s school page.");
-			return "redirect:/schools/" + school.get().getDomain().substring(0, school.get().getDomain().length() - 4);
-		} else {
-			redirectAttributes.addFlashAttribute("messageWarning",
-				"Your user account has been created, but we could not find a school matching your email domain");
-			// Redirect a user to the schools page if their school was not found.
-			return "redirect:/schools";
-		}
+		// 3. Redirect new user to homepage with welcome message
+		String nickname = user.getNickname() != null ? user.getNickname() : user.getEmail();
+		redirectAttributes.addFlashAttribute("messageSuccess",
+			"Welcome, " + nickname + "! Your account has been created.");
+		return "redirect:/";
 	}
 
 	private Optional<School> findSchoolByRecursiveDomain(String email) {
@@ -117,28 +108,25 @@ public class AuthController {
 	@GetMapping("/login-success")
 	public String processLoginSuccess(Principal principal, RedirectAttributes redirectAttributes) {
 		String email = principal.getName();
-		Optional<School> school = findSchoolByRecursiveDomain(email);
-
-		if(school.isPresent()) {
-			redirectAttributes.addFlashAttribute("messageSuccess",
-				"Welcome back! You have been redirected to " + school.get().getName() + "'s school page.");
-			return "redirect:/schools/" + school.get().getDomain().substring(0, school.get().getDomain().length() - 4);
-		} else {
-			redirectAttributes.addFlashAttribute("messageWarning",
-				"Welcome back! We could not find a school matching your email domain");
-			// Redirect a user to the schools page if their school was not found.
-			return "redirect:/schools";
-		}
+		// Look up the user to get their display name
+		String displayName = userService.findByEmail(email)
+			.map(u -> u.getNickname() != null ? u.getNickname() : u.getEmail())
+			.orElse(email);
+		redirectAttributes.addFlashAttribute("messageSuccess", "Welcome back, " + displayName + "!");
+		return "redirect:/";
 	}
 
 	@GetMapping("/login")
-	public String initLoginForm(Model model, HttpSession session) {
+	public String initLoginForm(Model model, HttpSession session,
+								@RequestParam(value = "error", required = false) String error) {
 		User user = new User();
-
-		String lastEmail = (String)session.getAttribute("LAST_EMAIL");
-		if(lastEmail != null) {
+		String lastEmail = (String) session.getAttribute("LAST_EMAIL");
+		if (lastEmail != null) {
 			user.setEmail(lastEmail);
 			session.removeAttribute("LAST_EMAIL");
+		}
+		if (error != null) {
+			model.addAttribute("messageDanger", "Invalid email or password.");
 		}
 		model.addAttribute("user", user);
 		return "auth/loginForm";

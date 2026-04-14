@@ -61,10 +61,11 @@ public class SecurityConfig {
 				.loginPage("/login") // Tells Spring where your custom HTML is
 				.usernameParameter("email") // Tells your security configuration to look for email instead of username.
 				.defaultSuccessUrl("/login-success", true) // Where to go after successful login
-				.failureHandler((request, response, exception) -> {
-					request.getSession().setAttribute("LAST_EMAIL", request.getParameter("email"));
-					response.sendRedirect("/login?error");
-				})
+//				.failureHandler((request, response, exception) -> {
+//					request.getSession().setAttribute("LAST_EMAIL", request.getParameter("email"));
+//					response.sendRedirect("/login?error");
+//				})
+					.failureUrl("/login?error=true")
 				.permitAll()
 			)
 			.logout(logout -> logout

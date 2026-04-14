@@ -3,7 +3,6 @@ package org.springframework.samples.petclinic.user;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.samples.petclinic.school.School;
 import org.springframework.samples.petclinic.school.SchoolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.aot.DisabledInAotMode;
@@ -72,39 +71,32 @@ class AuthControllerTest {
 	}
 
 	@Test
-	void testProcessRegisterWithSubdomainRedirect() throws Exception {
-		School kirkwood = new School();
-		kirkwood.setId(1);
-		kirkwood.setName("Kirkwood");
-		kirkwood.setDomain("kirkwood.edu");
-
-		given(schoolRepository.findByDomain("kirkwood.edu")).willReturn(Optional.of(kirkwood));
-		given(schoolRepository.findByDomain("student.kirkwood.edu")).willReturn(Optional.empty());
-		given(userService.registerNewStudent(any(User.class))).willReturn(new User());
+	void testProcessRegisterRedirectsToHomeOnSuccess() throws Exception {
+		given(userService.registerNewCollector(any(User.class))).willReturn(new User());
 		given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-			.willReturn(new TestingAuthenticationToken("user", "password", "ROLE_STUDENT"));
+			.willReturn(new TestingAuthenticationToken("user", "password", "ROLE_COLLECTOR"));
 
 		mockMvc.perform(post("/register-student")
 				.with(csrf())
-				.param("email", "alex@student.kirkwood.edu")
+				.param("email", "collector@gmail.com")
 				.param("password", "StrongPass1!"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/schools/kirkwood"));
+			.andExpect(redirectedUrl("/"))
+			.andExpect(flash().attributeExists("messageSuccess"));
 	}
 
 	@Test
-	void testProcessRegisterRedirectsToSchoolsIfNoMatch() throws Exception {
-		given(schoolRepository.findByDomain(anyString())).willReturn(Optional.empty());
-		given(userService.registerNewStudent(any(User.class))).willReturn(new User());
-		given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-			.willReturn(new TestingAuthenticationToken("user", "password", "ROLE_STUDENT"));
+	void testProcessRegisterDuplicateEmailShowsError() throws Exception {
+		given(userService.registerNewCollector(any(User.class)))
+			.willThrow(new RuntimeException("Email already registered"));
 
 		mockMvc.perform(post("/register-student")
 				.with(csrf())
-				.param("email", "someone@gmail.com")
+				.param("email", "duplicate@gmail.com")
 				.param("password", "StrongPass1!"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/schools"));
+			.andExpect(status().isOk())
+			.andExpect(view().name("auth/registerForm"))
+			.andExpect(model().attributeHasFieldErrors("user", "email"));
 	}
 
 	// -------------------------------------------------------------------------
@@ -121,10 +113,10 @@ class AuthControllerTest {
 
 	@Test
 	void testInitLoginFormRemembersFailedEmail() throws Exception {
-		mockMvc.perform(get("/login").sessionAttr("LAST_EMAIL", "wrong@kirkwood.edu"))
+		mockMvc.perform(get("/login").sessionAttr("LAST_EMAIL", "wrong@gmail.com"))
 			.andExpect(status().isOk())
 			.andExpect(model().attributeExists("user"))
-			.andExpect(content().string(containsString("wrong@kirkwood.edu")));
+			.andExpect(content().string(containsString("wrong@gmail.com")));
 	}
 
 	// -------------------------------------------------------------------------
@@ -132,30 +124,30 @@ class AuthControllerTest {
 	// -------------------------------------------------------------------------
 
 	@Test
-	void testLoginSuccessRedirectsToSchool() throws Exception {
-		School mockSchool = new School();
-		mockSchool.setName("Kirkwood Community College");
-		mockSchool.setDomain("kirkwood.edu");
+	void testLoginSuccessRedirectsToHomeWithWelcomeMessage() throws Exception {
+		User mockUser = new User();
+		mockUser.setEmail("collector@gmail.com");
+		mockUser.setNickname("GameFan");
 
-		given(schoolRepository.findByDomain(anyString())).willReturn(Optional.of(mockSchool));
+		given(userService.findByEmail(anyString())).willReturn(Optional.of(mockUser));
 
-		Principal mockPrincipal = () -> "student@kirkwood.edu";
+		Principal mockPrincipal = () -> "collector@gmail.com";
 
 		mockMvc.perform(get("/login-success").principal(mockPrincipal))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/schools/kirkwood"))
+			.andExpect(redirectedUrl("/"))
 			.andExpect(flash().attributeExists("messageSuccess"));
 	}
 
 	@Test
-	void testLoginSuccessRedirectsToSchoolsListIfNotFound() throws Exception {
-		given(schoolRepository.findByDomain(anyString())).willReturn(Optional.empty());
+	void testLoginSuccessRedirectsToHomeWhenUserNotFound() throws Exception {
+		given(userService.findByEmail(anyString())).willReturn(Optional.empty());
 
-		Principal mockPrincipal = () -> "student@unknown.com";
+		Principal mockPrincipal = () -> "unknown@gmail.com";
 
 		mockMvc.perform(get("/login-success").principal(mockPrincipal))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/schools"))
-			.andExpect(flash().attributeExists("messageWarning"));
+			.andExpect(redirectedUrl("/"))
+			.andExpect(flash().attributeExists("messageSuccess"));
 	}
 }
