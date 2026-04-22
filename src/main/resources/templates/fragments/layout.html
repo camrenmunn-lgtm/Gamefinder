@@ -143,7 +143,7 @@
       <ul class="navbar-nav ms-auto">
 
         <li class="nav-item" sec:authorize="!isAuthenticated()">
-          <a class="nav-link" th:href="@{/register-student}"
+          <a class="nav-link" th:href="@{/register}"
              th:classappend="${menu == 'register' ? 'active' : ''}">
             <span class="fa fa-user-plus"></span> Register
           </a>

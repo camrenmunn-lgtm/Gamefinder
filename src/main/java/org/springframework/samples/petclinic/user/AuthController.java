@@ -36,13 +36,13 @@ public class AuthController {
 		this.authenticationManager = authenticationManager;
 	}
 
-	@GetMapping("/register-student")
+	@GetMapping({"/register-student", "/register"})
 	public String initRegisterForm(Model model) {
 		model.addAttribute("user", new User());
 		return "auth/registerForm";
 	}
 
-	@PostMapping("/register-student")
+	@PostMapping({"/register-student", "/register"} )
 	public String processRegisterForm(@Validated(OnRegister.class) @ModelAttribute("user") User user,
 									  BindingResult result,
 									  RedirectAttributes redirectAttributes,
