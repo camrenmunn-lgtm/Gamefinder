@@ -315,3 +315,38 @@ CREATE TABLE IF NOT EXISTS recipes (
                                      CONSTRAINT recipes_id_unique            UNIQUE (id),
                                      CONSTRAINT recipes_internal_notes_unique UNIQUE (internal_notes)
 );
+CREATE TABLE IF NOT EXISTS game_lists (
+                                        id          INT AUTO_INCREMENT PRIMARY KEY,
+                                        user_id     INT          NOT NULL,
+                                        list_name   VARCHAR(100) NOT NULL,
+                                        description VARCHAR(500) NULL,
+                                        list_type   ENUM('Collection', 'Wishlist', 'Completed', 'Custom') NOT NULL DEFAULT 'Custom',
+                                        is_public   TINYINT(1)   NOT NULL DEFAULT 0,
+                                        created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                        updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        CONSTRAINT fk_game_lists_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS game_list_games (
+                                             game_list_id INT NOT NULL,
+                                             game_id      INT NOT NULL,
+                                             added_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                             PRIMARY KEY (game_list_id, game_id),
+                                             CONSTRAINT fk_glg_game_list_id FOREIGN KEY (game_list_id) REFERENCES game_lists(id) ON DELETE CASCADE,
+                                             CONSTRAINT fk_glg_game_id      FOREIGN KEY (game_id)      REFERENCES games(ID)       ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+                                     id          INT AUTO_INCREMENT PRIMARY KEY,
+                                     user_id     INT          NOT NULL,
+                                     game_id     INT          NOT NULL,
+                                     rating      INT          NOT NULL,
+                                     title       VARCHAR(150) NOT NULL,
+                                     body        TEXT         NULL,
+                                     created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                     updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                     CONSTRAINT fk_reviews_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                                     CONSTRAINT fk_reviews_game_id FOREIGN KEY (game_id) REFERENCES games(ID) ON DELETE CASCADE,
+                                     CONSTRAINT ck_reviews_rating  CHECK (rating BETWEEN 1 AND 5),
+                                     CONSTRAINT uk_reviews_user_game UNIQUE (user_id, game_id)
+);

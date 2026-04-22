@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (~{::body},'games')}">
+
+<body>
+
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Game Lists</h2>
+    <a href="/collector/lists/new" class="btn btn-primary">
+      <i class="fa fa-plus me-1"></i> New List
+    </a>
+  </div>
+
+  <div th:if="${#lists.isEmpty(gameLists)}" class="text-center py-5 text-muted">
+    <i class="fa fa-folder-open fa-3x d-block mb-3"></i>
+    <p class="lead">You haven't created any lists yet.</p>
+    <a href="/collector/lists/new" class="btn btn-outline-primary">Create your first list</a>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" th:unless="${#lists.isEmpty(gameLists)}">
+    <div class="col" th:each="gameList : ${gameLists}">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0" th:text="${gameList.listName}"></h5>
+            <span class="badge bg-secondary ms-2" th:text="${gameList.listType}"></span>
+          </div>
+          <p class="card-text text-muted small"
+             th:text="${gameList.description} ?: 'No description'"></p>
+          <p class="card-text small">
+            <i class="fa" th:classappend="${gameList.isPublic} ? 'fa-eye' : 'fa-eye-slash'"></i>
+            <span th:text="${gameList.isPublic} ? 'Public' : 'Private'"></span>
+          </p>
+        </div>
+        <div class="card-footer bg-transparent d-flex gap-2">
+          <a th:href="@{/collector/lists/__${gameList.id}__}"
+             class="btn btn-sm btn-outline-primary flex-grow-1">View</a>
+          <a th:href="@{/collector/lists/__${gameList.id}__/edit}"
+             class="btn btn-sm btn-outline-secondary">Edit</a>
+          <form th:action="@{/collector/lists/__${gameList.id}__/delete}"
+                method="post"
+                onsubmit="return confirm('Delete this list?')">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

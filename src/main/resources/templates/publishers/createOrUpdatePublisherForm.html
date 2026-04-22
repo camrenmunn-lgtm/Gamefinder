@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'games')}">
+
+<body>
+
+<div class="container mt-4" style="max-width: 640px;">
+
+  <a href="/admin/publishers" class="text-muted small text-decoration-none">&larr; All Publishers</a>
+
+  <h2 class="mt-2 mb-4" th:text="${publisher.isNew()} ? 'Add Publisher' : 'Edit Publisher'"></h2>
+
+  <form th:action="${publisher.isNew()}
+                    ? '/admin/publishers/new'
+                    : '/admin/publishers/' + ${publisher.id} + '/edit'"
+        th:object="${publisher}"
+        method="post">
+
+    <div class="mb-3">
+      <label for="name" class="form-label fw-semibold">Publisher Name <span class="text-danger">*</span></label>
+      <input type="text" id="name" th:field="*{name}"
+             class="form-control" th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+             placeholder="e.g. Nintendo">
+      <div class="invalid-feedback" th:errors="*{name}"></div>
+    </div>
+
+    <div class="mb-3">
+      <label for="publisherCountry" class="form-label fw-semibold">Country</label>
+      <input type="text" id="publisherCountry" th:field="*{publisherCountry}"
+             class="form-control" placeholder="e.g. Japan">
+    </div>
+
+    <div class="mb-3">
+      <label for="foundedYear" class="form-label fw-semibold">Founded Year</label>
+      <input type="number" id="foundedYear" th:field="*{foundedYear}"
+             class="form-control" placeholder="e.g. 1889" min="1400" max="2026">
+    </div>
+
+    <div class="mb-3">
+      <label for="publisherSite" class="form-label fw-semibold">Website URL</label>
+      <input type="url" id="publisherSite" th:field="*{publisherSite}"
+             class="form-control" placeholder="https://www.example.com">
+    </div>
+
+    <div class="mb-4">
+      <label for="publisherDescription" class="form-label fw-semibold">Description</label>
+      <textarea id="publisherDescription" th:field="*{publisherDescription}"
+                class="form-control" rows="4"
+                placeholder="Brief description of the publisher..."></textarea>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <span th:text="${publisher.isNew()} ? 'Add Publisher' : 'Save Changes'"></span>
+      </button>
+      <a href="/admin/publishers" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+</body>
+</html>

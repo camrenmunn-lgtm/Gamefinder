@@ -21,56 +21,77 @@ public class SecurityConfig {
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		// Make the AuthenticationManager (which knows about your UserDetailsService)
-		// available for injection in your controllers.
 		return config.getAuthenticationManager();
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf(csrf -> csrf.disable()) // Disable Cross-Site Request Forgery for API development
+			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorize -> authorize
-				// Public pages anyone can see
+
+				// -------------------------------------------------------
+				// PUBLIC — no login required
+				// -------------------------------------------------------
 				.requestMatchers(
 					"/",
 					"/register-student",
+					"/login",
 					"/resources/**",
-					"/recipes/**",
-					"/recipes/new",
-					"/games/**"
-
-
+					"/recipes/**"
 				).permitAll()
-				// Only SUPER_ADMIN users can add new schools
-				.requestMatchers("/schools/new").hasAuthority("MANAGE_ALL_SCHOOLS")
-				// All users can access the list of schools and individual schools
+
+				// Games list and detail pages are public (read-only)
+				.requestMatchers(HttpMethod.GET, "/games", "/games/**").permitAll()
+
+				// Schools (legacy AthlEagues routes — kept as-is)
 				.requestMatchers(HttpMethod.GET, "/schools", "/schools/{slug:[a-zA-Z-]+}").permitAll()
 
-				// Require login for the profile and any other user settings
+				// -------------------------------------------------------
+				// COLLECTOR — authority stored as "COLLECTOR" in DB
+				// -------------------------------------------------------
+				.requestMatchers("/collector/**").hasAuthority("COLLECTOR")
+
+				// Collectors can write/view reviews on game pages
+				.requestMatchers(HttpMethod.POST, "/games/*/reviews/**").hasAuthority("COLLECTOR")
+				.requestMatchers(HttpMethod.GET,  "/games/*/reviews/**").hasAuthority("COLLECTOR")
+
+				// -------------------------------------------------------
+				// ADMIN — authority stored as "ADMIN" in DB
+				// -------------------------------------------------------
+				.requestMatchers("/admin/**").hasAuthority("ADMIN")
+
+				// Admin-only write operations on games
+				.requestMatchers(HttpMethod.GET,  "/games/new").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/games/new").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.GET,  "/games/*/edit").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/games/*/edit").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/games/*/delete").hasAuthority("ADMIN")
+
+				// Legacy school management
+				.requestMatchers("/schools/new").hasAuthority("MANAGE_ALL_SCHOOLS")
+
+				// -------------------------------------------------------
+				// AUTHENTICATED — any logged-in user
+				// -------------------------------------------------------
 				.requestMatchers("/users/profile", "/users/delete").authenticated()
 
-				.requestMatchers("/games/new").authenticated()
-
-				// PROTECTED CATCH-ALL (This protects unlisted POST/PUT/DELETE, etc.)
+				// -------------------------------------------------------
+				// CATCH-ALL
+				// -------------------------------------------------------
 				.anyRequest().authenticated()
 			)
-			// Ensure all auto-challenge mechanisms are disabled
-			.httpBasic(AbstractHttpConfigurer::disable) // Disable the login popup
+			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(form -> form
-				.loginPage("/login") // Tells Spring where your custom HTML is
-				.usernameParameter("email") // Tells your security configuration to look for email instead of username.
-				.defaultSuccessUrl("/login-success", true) // Where to go after successful login
-//				.failureHandler((request, response, exception) -> {
-//					request.getSession().setAttribute("LAST_EMAIL", request.getParameter("email"));
-//					response.sendRedirect("/login?error");
-//				})
-					.failureUrl("/login?error=true")
+				.loginPage("/login")
+				.usernameParameter("email")
+				.defaultSuccessUrl("/login-success", true)
+				.failureUrl("/login?error=true")
 				.permitAll()
 			)
 			.logout(logout -> logout
 				.logoutUrl("/logout")
-				.logoutSuccessUrl("/login?logout") // Triggers the green alert box
+				.logoutSuccessUrl("/login?logout")
 				.permitAll()
 			);
 

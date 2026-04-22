@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'games')}">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (~{::body},'games')}">
 
 <body>
 
 <h2 th:text="#{games}">Games</h2>
 
-<a th:href="@{/games/new}" class="btn btn-primary" th:text="#{addGame}">Add Game</a>
+<!-- Add Game button — ADMIN only -->
+<a sec:authorize="hasAuthority('ADMIN')"
+   th:href="@{/games/new}" class="btn btn-primary mb-3" th:text="#{addGame}">Add Game</a>
+
 <table id="games" class="table table-striped">
   <thead>
   <tr>
@@ -16,6 +21,7 @@
     <th th:text="#{publisher}">Publisher</th>
     <th th:text="#{rarityScore}">Rarity</th>
     <th th:text="#{avgValue}">Avg Value</th>
+    <th sec:authorize="hasAuthority('ADMIN')">Actions</th>
   </tr>
   </thead>
   <tbody>
@@ -23,11 +29,18 @@
     <td>
       <a th:href="@{/games/__${game.id}__}" th:text="${game.name}"></a>
     </td>
-    <td th:text="${game.gameType}" />
-    <td th:text="${game.releaseYear}" />
-    <td th:text="${game.publisher != null ? game.publisher.name : ''}" />
-    <td th:text="${game.rarityScore}" />
-    <td th:text="${game.avgValue}" />
+    <td th:text="${game.gameType}"/>
+    <td th:text="${game.releaseYear}"/>
+    <td th:text="${game.publisher != null ? game.publisher.name : ''}"/>
+    <td th:text="${game.rarityScore}"/>
+    <td th:text="${game.avgValue}"/>
+    <td sec:authorize="hasAuthority('ADMIN')">
+      <a th:href="@{/games/__${game.id}__/edit}" class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+      <form th:action="@{/games/__${game.id}__/delete}" method="post" class="d-inline"
+            onsubmit="return confirm('Delete this game?')">
+        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+      </form>
+    </td>
   </tr>
   </tbody>
 </table>
@@ -58,8 +71,5 @@
   </span>
 </div>
 
-
-
 </body>
-
 </html>

@@ -27,6 +27,11 @@ public interface GameRepository extends Repository<Game, Integer> {
 	void save(Game game);
 
 	/**
+	 * Delete a Game from the data store.
+	 */
+	void delete(Game game);
+
+	/**
 	 * Retrieve a Game by its id.
 	 */
 	@Transactional(readOnly = true)

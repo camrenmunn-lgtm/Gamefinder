@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'games')}">
+
+<body>
+
+<div class="container mt-4" style="max-width: 640px;">
+
+  <h2 class="mb-4" th:text="${gameList.isNew()} ? 'Create New List' : 'Edit List'"></h2>
+
+  <form th:action="${gameList.isNew()} ? '/collector/lists/new' : '/collector/lists/' + ${gameList.id} + '/edit'"
+        th:object="${gameList}"
+        method="post">
+
+    <div class="mb-3">
+      <label for="listName" class="form-label fw-semibold">List Name <span class="text-danger">*</span></label>
+      <input type="text" id="listName" th:field="*{listName}"
+             class="form-control" th:classappend="${#fields.hasErrors('listName')} ? 'is-invalid'"
+             placeholder="e.g. My NES Collection">
+      <div class="invalid-feedback" th:errors="*{listName}"></div>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label fw-semibold">Description</label>
+      <textarea id="description" th:field="*{description}"
+                class="form-control" rows="3"
+                placeholder="What's this list for?"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="listType" class="form-label fw-semibold">List Type <span class="text-danger">*</span></label>
+      <select id="listType" th:field="*{listType}"
+              class="form-select" th:classappend="${#fields.hasErrors('listType')} ? 'is-invalid'">
+        <option th:each="type : ${listTypes}"
+                th:value="${type}"
+                th:text="${type}"></option>
+      </select>
+      <div class="invalid-feedback" th:errors="*{listType}"></div>
+    </div>
+
+    <div class="mb-4 form-check">
+      <input type="checkbox" id="isPublic" th:field="*{isPublic}" class="form-check-input">
+      <label for="isPublic" class="form-check-label">Make this list public</label>
+      <div class="form-text">Public lists are visible on your collector profile.</div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <span th:text="${gameList.isNew()} ? 'Create List' : 'Save Changes'"></span>
+      </button>
+      <a href="/collector/lists" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+</body>
+</html>
