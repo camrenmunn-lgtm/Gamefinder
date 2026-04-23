@@ -45,6 +45,8 @@ public class SecurityConfig {
 				// Games list and detail pages are public (read-only)
 				.requestMatchers(HttpMethod.GET, "/games", "/games/**").permitAll()
 
+				.requestMatchers(HttpMethod.GET, "/recipes/**").permitAll()
+
 				// Schools (legacy AthlEagues routes — kept as-is)
 				.requestMatchers(HttpMethod.GET, "/schools", "/schools/{slug:[a-zA-Z-]+}").permitAll()
 
@@ -68,6 +70,9 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET,  "/games/*/edit").hasAuthority("ADMIN")
 				.requestMatchers(HttpMethod.POST, "/games/*/edit").hasAuthority("ADMIN")
 				.requestMatchers(HttpMethod.POST, "/games/*/delete").hasAuthority("ADMIN")
+				.requestMatchers("/recipes/**").hasAuthority("ADMIN")
+
+
 
 				// Legacy school management
 				.requestMatchers("/schools/new").hasAuthority("MANAGE_ALL_SCHOOLS")

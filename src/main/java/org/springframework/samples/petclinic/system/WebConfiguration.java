@@ -1,56 +1,31 @@
 package org.springframework.samples.petclinic.system;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.time.Duration;
 import java.util.Locale;
 
-/**
- * Configures internationalization (i18n) support for the application.
- *
- * <p>
- * Handles loading language-specific messages, tracking the user's language, and allowing
- * language changes via the URL parameter (e.g., <code>?lang=de</code>).
- * </p>
- *
- * @author Anuj Ashok Potdar
- */
 @Configuration
 @SuppressWarnings("unused")
 public class WebConfiguration implements WebMvcConfigurer {
 
-	/**
-	 * Uses session storage to remember the user’s language setting across requests.
-	 * Defaults to English if nothing is specified.
-	 * @return session-based {@link LocaleResolver}
-	 */
-//	@Bean
-//	public LocaleResolver localeResolver() {
-//		SessionLocaleResolver resolver = new SessionLocaleResolver();
-//		resolver.setDefaultLocale(Locale.ENGLISH);
-//		return resolver;
-//	}
 	@Bean
 	public LocaleResolver localeResolver() {
-		// Creates a cookie named "PREFERRED_LANGUAGE"
 		CookieLocaleResolver resolver = new CookieLocaleResolver("PREFERRED_LANGUAGE");
 		resolver.setDefaultLocale(Locale.ENGLISH);
-		resolver.setCookieMaxAge(Duration.ofDays(365)); // Remembers them for a year!
+		resolver.setCookieMaxAge(Duration.ofDays(365));
 		return resolver;
 	}
 
-	/**
-	 * Allows the app to switch languages using a URL parameter like
-	 * <code>?lang=es</code>.
-	 * @return a {@link LocaleChangeInterceptor} that handles the change
-	 */
 	@Bean
 	public LocaleChangeInterceptor localeChangeInterceptor() {
 		LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
@@ -58,13 +33,33 @@ public class WebConfiguration implements WebMvcConfigurer {
 		return interceptor;
 	}
 
-	/**
-	 * Registers the locale change interceptor so it can run on each request.
-	 * @param registry where interceptors are added
-	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());
+		registry.addInterceptor(new TrailingSlashInterceptor());
 	}
 
+	/**
+	 * Redirects any request with a trailing slash to the same path without it.
+	 * e.g. /games/ -> /games
+	 */
+	static class TrailingSlashInterceptor implements HandlerInterceptor {
+
+		@Override
+		public boolean preHandle(HttpServletRequest request,
+								 HttpServletResponse response,
+								 Object handler) throws Exception {
+			String path = request.getRequestURI();
+			if (path.length() > 1 && path.endsWith("/")) {
+				String queryString = request.getQueryString();
+				String redirectUrl = path.substring(0, path.length() - 1);
+				if (queryString != null) {
+					redirectUrl += "?" + queryString;
+				}
+				response.sendRedirect(redirectUrl);
+				return false;
+			}
+			return true;
+		}
+	}
 }

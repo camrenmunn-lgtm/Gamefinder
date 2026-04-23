@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (~{::body},'error')}">
+
+<body>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+
+      <!-- Pixel art style 404 -->
+      <div style="font-family: 'Courier New', monospace; margin-bottom: 2rem;">
+
+        <!-- Big glitchy 404 -->
+        <div style="font-size: 7rem; font-weight: 900; line-height: 1;
+                    color: #6db33f; text-shadow: 4px 4px 0 #3a6b1a, -2px -2px 0 #1a3a0a;
+                    letter-spacing: -4px;">
+          404
+        </div>
+
+        <!-- Controller ASCII art -->
+        <pre style="color: #6db33f; font-size: 0.75rem; line-height: 1.3;
+                    display: inline-block; text-align: left; margin: 1rem 0;">
+  ___________________________
+ |  _  _           _  _  _  |
+ | |&lt;| |&gt;|  ___  |A||B||X| |
+ |  ---    |   |   ---  |Y| |
+ |   |     |___|    |Y|     |
+ |  ---         SELECT START |
+ |___________________________|
+        </pre>
+
+        <h2 style="color: #e8f4fd; font-size: 1.5rem; margin-bottom: 0.5rem;">
+          GAME OVER
+        </h2>
+        <p style="color: #6db33f; letter-spacing: 3px; font-size: 0.85rem; margin-bottom: 2rem;">
+          PAGE NOT FOUND — INSERT COIN TO CONTINUE
+        </p>
+
+        <p class="text-muted mb-4" style="font-family: sans-serif;">
+          The page you're looking for doesn't exist, was moved, or was never unlocked.
+        </p>
+
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+          <a th:href="@{/}" class="btn btn-success">
+            <i class="fa fa-home me-1"></i> Back to Home
+          </a>
+          <a th:href="@{/games}" class="btn btn-outline-secondary">
+            <i class="fa fa-gamepad me-1"></i> Browse Games
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
