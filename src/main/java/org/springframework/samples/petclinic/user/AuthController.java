@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.samples.petclinic.school.School;
 import org.springframework.samples.petclinic.school.SchoolRepository;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -117,18 +118,14 @@ public class AuthController {
 	}
 
 	@GetMapping("/login")
-	public String initLoginForm(Model model, HttpSession session,
-								@RequestParam(value = "error", required = false) String error) {
-		User user = new User();
-		String lastEmail = (String) session.getAttribute("LAST_EMAIL");
-		if (lastEmail != null) {
-			user.setEmail(lastEmail);
-			session.removeAttribute("LAST_EMAIL");
-		}
+	public String initLoginForm(@RequestParam(value = "error", required = false) String error,
+								HttpServletRequest request,
+								Model model) {
 		if (error != null) {
 			model.addAttribute("messageDanger", "Invalid email or password.");
+			String lastEmail = (String) request.getSession().getAttribute("lastEmail");
+			model.addAttribute("lastEmail", lastEmail);
 		}
-		model.addAttribute("user", user);
 		return "auth/loginForm";
 	}
 

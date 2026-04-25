@@ -38,17 +38,18 @@ public class SecurityConfig {
 					"/register-student",
 					"/register",
 					"/login",
+					"/error",
 					"/resources/**",
 					"/recipes/**"
 				).permitAll()
 
-				// Games list and detail pages are public (read-only)
-				.requestMatchers(HttpMethod.GET, "/games", "/games/**").permitAll()
-
-				.requestMatchers(HttpMethod.GET, "/recipes/**").permitAll()
-
-				// Schools (legacy AthlEagues routes — kept as-is)
-				.requestMatchers(HttpMethod.GET, "/schools", "/schools/{slug:[a-zA-Z-]+}").permitAll()
+				// Admin-only write operations on games
+				.requestMatchers(HttpMethod.GET,  "/games/new").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/games/new").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.GET,  "/games/*/edit").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/games/*/edit").hasAuthority("ADMIN")
+				.requestMatchers(HttpMethod.POST, "/games/*/delete").hasAuthority("ADMIN")
+				.requestMatchers("/recipes/**").hasAuthority("ADMIN")
 
 				// -------------------------------------------------------
 				// COLLECTOR — authority stored as "COLLECTOR" in DB
@@ -64,13 +65,14 @@ public class SecurityConfig {
 				// -------------------------------------------------------
 				.requestMatchers("/admin/**").hasAuthority("ADMIN")
 
-				// Admin-only write operations on games
-				.requestMatchers(HttpMethod.GET,  "/games/new").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.POST, "/games/new").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.GET,  "/games/*/edit").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.POST, "/games/*/edit").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.POST, "/games/*/delete").hasAuthority("ADMIN")
-				.requestMatchers("/recipes/**").hasAuthority("ADMIN")
+
+				// Games list and detail pages are public (read-only)
+				.requestMatchers(HttpMethod.GET, "/games", "/games/**").permitAll()
+
+				.requestMatchers(HttpMethod.GET, "/recipes/**").permitAll()
+
+				// Schools (legacy AthlEagues routes — kept as-is)
+				.requestMatchers(HttpMethod.GET, "/schools", "/schools/{slug:[a-zA-Z-]+}").permitAll()
 
 
 
@@ -92,7 +94,11 @@ public class SecurityConfig {
 				.loginPage("/login")
 				.usernameParameter("email")
 				.defaultSuccessUrl("/login-success", true)
-				.failureUrl("/login?error=true")
+				.failureHandler((request, response, exception) -> {
+					String email = request.getParameter("email");
+					request.getSession().setAttribute("lastEmail", email);
+					response.sendRedirect("/login?error=true");
+				})
 				.permitAll()
 			)
 			.logout(logout -> logout
